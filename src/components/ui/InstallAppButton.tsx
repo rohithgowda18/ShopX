@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Smartphone, CheckCircle } from 'lucide-react';
+import { Download, Smartphone, CheckCircle, Info } from 'lucide-react';
 import { Card, Button } from './DesignSystem';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -10,11 +10,19 @@ interface BeforeInstallPromptEvent extends Event {
 export default function InstallAppButton() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    // Detect if app is already running as PWA (standalone mode)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+    if (isStandalone) {
       setIsInstalled(true);
     }
+
+    // Detect iOS devices
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const iosDevice = /iphone|ipad|ipod/.test(userAgent);
+    setIsIOS(iosDevice);
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
@@ -36,13 +44,18 @@ export default function InstallAppButton() {
   }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    await deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setIsInstalled(true);
+    if (deferredPrompt) {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setIsInstalled(true);
+      }
+      setDeferredPrompt(null);
+    } else if (isIOS) {
+      alert('To install on iPhone/iPad: Tap the Share button in Safari and select "Add to Home Screen" 📲');
+    } else {
+      alert('To install on Desktop/Android: Open your browser menu (⋮ or ⊕) and tap "Install app" or "Add to Home screen".');
     }
-    setDeferredPrompt(null);
   };
 
   if (isInstalled) {
@@ -61,10 +74,6 @@ export default function InstallAppButton() {
     );
   }
 
-  if (!deferredPrompt) {
-    return null;
-  }
-
   return (
     <Card className="p-5 border-2 border-emerald-500/40 dark:border-emerald-500/60 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-100/50 dark:from-emerald-950/50 dark:via-teal-950/40 dark:to-emerald-900/30 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div className="flex items-start space-x-3.5">
@@ -81,7 +90,7 @@ export default function InstallAppButton() {
         </div>
       </div>
       <Button onClick={handleInstallClick} variant="primary" size="md" className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2 py-3 px-5 shadow-md">
-        <Download className="w-4 h-4" /> Install App
+        <Download className="w-4 h-4" /> {deferredPrompt ? 'Install App' : 'How to Install'}
       </Button>
     </Card>
   );
