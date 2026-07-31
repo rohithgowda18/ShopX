@@ -131,9 +131,19 @@ export default function CreateList() {
   const totalPrice = items.reduce((acc, item) => {
     const product = PRODUCTS.find(p => p.englishName.toLowerCase() === item.name.toLowerCase());
     if (product) {
-      if (item.unit === product.defaultUnit) return acc + product.price * item.quantity;
-      if (item.unit === 'g' && product.defaultUnit === 'kg') return acc + product.price * (item.quantity / 1000);
-      if (item.unit === 'ml' && product.defaultUnit === 'litre') return acc + product.price * (item.quantity / 1000);
+      const basePrice = product.price;
+      const baseUnit = product.defaultUnit.toLowerCase();
+      const currentUnit = item.unit.toLowerCase();
+      let multiplier = 1;
+
+      if (baseUnit === 'kg' && currentUnit === 'g') multiplier = 0.001;
+      if (baseUnit === 'g' && currentUnit === 'kg') multiplier = 1000;
+      if (baseUnit === 'litre' && currentUnit === 'ml') multiplier = 0.001;
+      if (baseUnit === 'ml' && currentUnit === 'litre') multiplier = 1000;
+      if (baseUnit === 'piece' && currentUnit === 'dozen') multiplier = 12;
+      if (baseUnit === 'dozen' && currentUnit === 'piece') multiplier = 1/12;
+
+      return acc + (basePrice * item.quantity * multiplier);
     }
     return acc;
   }, 0);
