@@ -111,10 +111,10 @@ export default function Login() {
     <div className="h-[100dvh] flex items-center justify-center bg-gray-50 dark:bg-gray-900 sm:max-w-md sm:mx-auto sm:border-x sm:border-gray-200 dark:sm:border-gray-800 transition-colors shadow-2xl overflow-hidden">
       <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl w-full mx-4 transition-colors max-h-[95dvh] overflow-y-auto">
         <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
-            <span className="text-white font-bold text-3xl">K</span>
+          <div className="w-16 h-16 bg-emerald-50 dark:bg-gray-700/60 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md p-2">
+            <img src="/icons/shopping-cart.png" alt="Namma Angadi Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Kirana AI</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Namma Angadi</h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Your smart grocery assistant</p>
         </div>
 

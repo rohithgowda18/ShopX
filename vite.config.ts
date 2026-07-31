@@ -12,6 +12,11 @@ export default defineConfig(() => {
       VitePWA({
         registerType: 'autoUpdate',
         injectRegister: 'auto',
+        devOptions: {
+          enabled: true,
+          type: 'module',
+          navigateFallback: 'index.html',
+        },
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon.svg', 'icons/*.png', 'manifest.webmanifest'],
         manifest: false, // Use public/manifest.webmanifest
         workbox: {

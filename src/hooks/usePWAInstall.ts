@@ -1,3 +1,4 @@
+// Global window listener for beforeinstallprompt captured before React mounts
 import { useState, useEffect } from 'react';
 
 export interface BeforeInstallPromptEvent extends Event {
@@ -5,8 +6,26 @@ export interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+let globalDeferredPrompt: BeforeInstallPromptEvent | null = null;
+const promptListeners = new Set<(prompt: BeforeInstallPromptEvent | null) => void>();
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('[PWA Global] Captured beforeinstallprompt event before React mount!');
+    e.preventDefault();
+    globalDeferredPrompt = e as BeforeInstallPromptEvent;
+    promptListeners.forEach(fn => fn(globalDeferredPrompt));
+  });
+
+  window.addEventListener('appinstalled', () => {
+    console.log('[PWA Global] App was installed successfully');
+    globalDeferredPrompt = null;
+    promptListeners.forEach(fn => fn(null));
+  });
+}
+
 export function usePWAInstall() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(globalDeferredPrompt);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
@@ -23,60 +42,58 @@ export function usePWAInstall() {
       setIsInstalled(true);
     }
 
-    // 2. Detect Platform
+    // 2. Platform detection
     const ua = window.navigator.userAgent.toLowerCase();
     setIsIOS(/iphone|ipad|ipod/.test(ua));
     setIsAndroid(/android/.test(ua));
 
-    // 3. Listen for beforeinstallprompt event
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    // 3. Subscribe to prompt listener
+    const unsubscribe = (prompt: BeforeInstallPromptEvent | null) => {
+      setDeferredPrompt(prompt);
+      if (!prompt && checkStandalone()) {
+        setIsInstalled(true);
+      }
     };
 
-    // 4. Listen for appinstalled event
-    const handleAppInstalled = () => {
-      setIsInstalled(true);
-      setDeferredPrompt(null);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
+    promptListeners.add(unsubscribe);
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
+      promptListeners.delete(unsubscribe);
     };
   }, []);
 
   const triggerInstall = async () => {
-    if (deferredPrompt) {
+    const activePrompt = deferredPrompt || globalDeferredPrompt;
+    if (activePrompt) {
+      console.log('[PWA Hook] Triggering native browser install prompt dialog');
       try {
-        await deferredPrompt.prompt();
-        const choice = await deferredPrompt.userChoice;
+        await activePrompt.prompt();
+        const choice = await activePrompt.userChoice;
+        console.log('[PWA Hook] User install choice:', choice.outcome);
         if (choice.outcome === 'accepted') {
           setIsInstalled(true);
         }
       } catch (err) {
-        console.error('[PWA Hook] Install prompt failed:', err);
+        console.error('[PWA Hook] Error executing prompt():', err);
       } finally {
+        globalDeferredPrompt = null;
         setDeferredPrompt(null);
       }
     } else {
+      console.warn('[PWA Hook] beforeinstallprompt event is not available in current window/browser context.');
       if (isIOS) {
         alert('To install on iPhone/iPad:\n1. Tap the Share button in Safari\n2. Select "Add to Home Screen" 📲');
       } else {
-        alert("To install Kirana AI:\n1. Open browser menu (⋮ or ⊕)\n2. Select 'Install app' or 'Add to Home screen'.");
+        alert("To install Namma Angadi:\n1. Open browser menu (⋮ or ⊕)\n2. Select 'Install app' or 'Add to Home screen'.");
       }
     }
   };
 
   return {
-    canInstall: !isInstalled && (!!deferredPrompt || isIOS || true),
+    canInstall: !isInstalled && (!!deferredPrompt || !!globalDeferredPrompt || isIOS),
     isInstalled,
     isIOS,
     isAndroid,
     triggerInstall,
-    hasNativePrompt: !!deferredPrompt,
+    hasNativePrompt: !!(deferredPrompt || globalDeferredPrompt),
   };
 }

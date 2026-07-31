@@ -78,11 +78,11 @@ export default function AppLayout() {
       {/* Sidebar for Desktop (md+) */}
       <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shrink-0">
         <div className="p-6 flex items-center space-x-3 border-b border-gray-200 dark:border-gray-700">
-          <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-md">
-            <span className="text-white font-bold text-xl">K</span>
+          <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md flex items-center justify-center bg-emerald-50 dark:bg-gray-700 p-1">
+            <img src="/icons/shopping-cart.png" alt="Namma Angadi Logo" className="w-full h-full object-contain" />
           </div>
           <div>
-            <h1 className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">Kirana AI</h1>
+            <h1 className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">Namma Angadi</h1>
             <p className="text-xs text-gray-500 capitalize">{userProfile?.role?.replace('_', ' ') || 'User'}</p>
           </div>
         </div>
@@ -105,7 +105,7 @@ export default function AppLayout() {
             <button
               onClick={handleInstallClick}
               className="flex items-center space-x-3 w-full px-4 py-3 rounded-xl text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 font-semibold transition-all min-h-touch"
-              title="Install Kirana AI App"
+              title="Install Namma Angadi App"
             >
               <Download className="w-5 h-5 text-emerald-600" />
               <span className="text-sm font-bold">Install App</span>
@@ -124,18 +124,18 @@ export default function AppLayout() {
       {/* Header for Mobile (<md) */}
       <header className="md:hidden bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between border-b dark:border-gray-700 z-10 shrink-0">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center shadow-sm">
-            <span className="text-white font-bold text-lg">K</span>
+          <div className="w-8 h-8 rounded-full overflow-hidden shadow-sm flex items-center justify-center bg-emerald-50 dark:bg-gray-700 p-0.5">
+            <img src="/icons/shopping-cart.png" alt="Namma Angadi Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-xl font-bold text-gray-800 dark:text-white tracking-tight">Kirana AI</h1>
+          <h1 className="text-xl font-bold text-gray-800 dark:text-white tracking-tight">Namma Angadi</h1>
         </div>
         <div className="flex items-center space-x-2">
           {!isInstalled && (
             <button
               onClick={handleInstallClick}
               className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold min-h-touch"
-              title="Install Kirana AI App"
-              aria-label="Install Kirana AI App"
+              title="Install Namma Angadi App"
+              aria-label="Install Namma Angadi App"
             >
               <Download className="w-4 h-4" />
               <span>Install App</span>

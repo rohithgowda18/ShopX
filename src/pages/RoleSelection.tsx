@@ -27,7 +27,7 @@ export default function RoleSelection() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 max-w-md mx-auto p-4">
       <div className="w-full">
-        <h1 className="text-2xl font-bold text-gray-900 text-center mb-2">Welcome to Kirana AI</h1>
+        <h1 className="text-2xl font-bold text-gray-900 text-center mb-2">Welcome to Namma Angadi</h1>
         <p className="text-gray-500 text-center mb-8">How will you use this app?</p>
 
         <div className="space-y-4">
