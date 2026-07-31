@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { ListPlus, Mic, Camera, Clock, Package, CheckCircle, AlertCircle, ShoppingBag, Store, RotateCcw, Search, ChevronRight } from 'lucide-react';
+import { ListPlus, Mic, Camera, Clock, Package, CheckCircle, AlertCircle, ShoppingBag, RotateCcw, Search, ChevronRight, Sparkles, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase/config';
@@ -10,6 +10,7 @@ import ProductCard from '../../components/customer/ProductCard';
 import QuantityBottomSheet from '../../components/customer/QuantityBottomSheet';
 import SearchBar from '../../components/customer/SearchBar';
 import { Product } from '../../data/types';
+import { Card, Badge, Button, Skeleton } from '../../components/ui/DesignSystem';
 
 export default function CustomerDashboard() {
   const { userProfile } = useAuth();
@@ -52,36 +53,35 @@ export default function CustomerDashboard() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getBadgeVariant = (status: string): 'default' | 'success' | 'warning' | 'danger' | 'info' => {
     switch (status) {
-      case 'pending': return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800';
+      case 'pending': return 'warning';
       case 'accepted':
-      case 'packing': return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800';
+      case 'packing': return 'info';
       case 'ready':
-      case 'delivered': return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800';
-      default: return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800';
+      case 'delivered': return 'success';
+      default: return 'danger';
     }
   };
 
   const buyAgainProducts = PRODUCTS.slice(0, 4);
+  const monthlyProducts = PRODUCTS.slice(4, 8);
   const popularProducts = PRODUCTS.filter(p => p.popular).slice(0, 4);
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-6xl mx-auto pb-24">
-      {/* Header & Greeting */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-            Namaskara, {userProfile?.name || 'Customer'} 👋
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-            Smart local Kirana grocery shopping
-          </p>
-        </div>
+    <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto pb-28">
+      {/* 1. Hero Greeting Header */}
+      <div className="bg-gradient-to-r from-emerald-600 to-teal-700 dark:from-emerald-900 dark:to-teal-950 p-6 rounded-3xl text-white shadow-md">
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-1">
+          What do you need today? 🛒
+        </h1>
+        <p className="text-emerald-100 text-sm md:text-base font-medium">
+          Namaskara, {userProfile?.name || 'Friend'}! Your trusted local Kirana assistant is ready.
+        </p>
       </div>
 
-      {/* Prominent Search Bar */}
-      <div className="sticky top-0 z-20 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-md py-1 -mx-4 px-4 md:mx-0 md:px-0">
+      {/* 2. Hero Search Bar */}
+      <div className="sticky top-0 z-20 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-md py-2 -mx-4 px-4 md:mx-0 md:px-0">
         <SearchBar
           query={searchQuery}
           onChange={(q) => {
@@ -93,135 +93,146 @@ export default function CustomerDashboard() {
         />
       </div>
 
-      {/* Quick Action Grid */}
-      <div className="grid grid-cols-3 gap-3">
-        <button
-          onClick={() => navigate('/customer/create-list')}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white p-3.5 rounded-2xl shadow-sm flex flex-col items-center justify-center space-y-1.5 transition-all active:scale-95 min-h-touch"
-        >
-          <ListPlus className="w-6 h-6" />
-          <span className="font-bold text-xs">Manual List</span>
-        </button>
+      {/* 3. Primary User Action Cards with Friendly Indian Household Context */}
+      <div>
+        <h2 className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+          Quick Grocery Entry
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+          <button
+            onClick={() => navigate('/customer/create-list?mode=voice')}
+            className="bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-200 dark:border-emerald-800 p-4 rounded-2xl flex items-center justify-between hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-all active:scale-[0.98] text-left group min-h-touch"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                <Mic className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-gray-900 dark:text-white text-base">Speak Grocery List</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Kannada, English & Hindi</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+          </button>
 
-        <button
-          onClick={() => navigate('/customer/create-list?mode=voice')}
-          className="bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-2xl shadow-sm flex flex-col items-center justify-center space-y-1.5 transition-all active:scale-95 min-h-touch"
-        >
-          <Mic className="w-6 h-6" />
-          <span className="font-bold text-xs">Voice Input</span>
-        </button>
+          <button
+            onClick={() => navigate('/customer/create-list?mode=scan')}
+            className="bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-200 dark:border-amber-800 p-4 rounded-2xl flex items-center justify-between hover:bg-amber-100 dark:hover:bg-amber-900/60 transition-all active:scale-[0.98] text-left group min-h-touch"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-amber-500 text-white rounded-2xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                <Camera className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-gray-900 dark:text-white text-base">Scan Written List</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Photo of paper note</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+          </button>
 
-        <button
-          onClick={() => navigate('/customer/create-list?mode=scan')}
-          className="bg-orange-600 hover:bg-orange-700 text-white p-3.5 rounded-2xl shadow-sm flex flex-col items-center justify-center space-y-1.5 transition-all active:scale-95 min-h-touch"
-        >
-          <Camera className="w-6 h-6" />
-          <span className="font-bold text-xs">Scan List</span>
-        </button>
+          <button
+            onClick={() => navigate('/customer/create-list')}
+            className="bg-sky-50 dark:bg-sky-950/40 border-2 border-sky-200 dark:border-sky-800 p-4 rounded-2xl flex items-center justify-between hover:bg-sky-100 dark:hover:bg-sky-900/60 transition-all active:scale-[0.98] text-left group min-h-touch"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-sky-600 text-white rounded-2xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                <ListPlus className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-gray-900 dark:text-white text-base">Type Grocery List</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Manual item picker</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+          </button>
+        </div>
       </div>
 
-      {/* Main Responsive Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        {/* Left Column (2 Cols on Desktop): Recent Orders & Buy Again */}
-        <div className="md:col-span-2 space-y-6">
-          
-          {/* Recent Orders Section */}
-          <div className="bg-white dark:bg-gray-800 p-4 md:p-5 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-extrabold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-                <ShoppingBag className="w-5 h-5 text-emerald-600" /> Recent Orders
-              </h3>
-              <button 
-                onClick={() => navigate('/customer/orders')}
-                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 min-h-touch"
-              >
-                View All <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            {loading ? (
-              <div className="text-center py-6 text-xs text-gray-400">Loading orders...</div>
-            ) : recentOrders.length === 0 ? (
-              <div className="text-center py-6 text-gray-400 text-xs font-medium">
-                No recent orders found.
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {recentOrders.map(order => (
-                  <div key={order.id} className="p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-700 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-xs text-gray-800 dark:text-white">
-                        Order #{order.id.slice(-6).toUpperCase()}
-                      </span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getStatusBadge(order.status)} flex items-center gap-1 uppercase`}>
-                        {getStatusIcon(order.status)} {order.status}
-                      </span>
-                    </div>
-
-                    <p className="text-xs text-gray-600 dark:text-gray-300 truncate">
-                      {order.items.map(i => i.name).join(', ')}
-                    </p>
-
-                    <div className="flex justify-between items-center pt-1 text-xs border-t border-gray-200/50 dark:border-gray-600/50">
-                      <span className="text-gray-500 dark:text-gray-400">{order.items.length} Items</span>
-                      <button
-                        onClick={() => navigate('/customer/create-list', { state: { items: order.items } })}
-                        className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1 hover:underline min-h-touch"
-                      >
-                        <RotateCcw className="w-3.5 h-3.5" /> Reorder
-                      </button>
-                    </div>
+      {/* 4. Recent Orders Bar */}
+      {recentOrders.length > 0 && (
+        <Card className="p-4 md:p-5 border-emerald-100 dark:border-emerald-900/40 bg-emerald-50/30 dark:bg-emerald-950/10">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-extrabold text-base text-gray-900 dark:text-white flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 text-emerald-600" /> Active Recent Orders
+            </h2>
+            <button
+              onClick={() => navigate('/customer/orders')}
+              className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 min-h-touch"
+            >
+              View All <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {recentOrders.map(order => (
+              <div key={order.id} className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-xs text-gray-900 dark:text-white">#{order.id.slice(-6).toUpperCase()}</span>
+                    <Badge variant={getBadgeVariant(order.status)}>
+                      {order.status.toUpperCase()}
+                    </Badge>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Buy Again Carousel */}
-          <div>
-            <h3 className="font-extrabold text-lg text-gray-900 dark:text-white mb-3">❤️ Buy Again</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {buyAgainProducts.map(product => (
-                <ProductCard key={product.id} product={product} onAdd={(p) => setSelectedProduct(p)} />
-              ))}
-            </div>
-          </div>
-
-        </div>
-
-        {/* Right Column (1 Col on Desktop): Categories & Popular */}
-        <div className="space-y-6">
-          
-          {/* Categories Grid */}
-          <div className="bg-white dark:bg-gray-800 p-4 md:p-5 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm space-y-3">
-            <h3 className="font-extrabold text-lg text-gray-900 dark:text-white">Popular Categories</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {CATEGORIES.slice(0, 6).map(cat => (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate mb-2">
+                    {order.items.map(i => i.name).join(', ')}
+                  </p>
+                </div>
                 <button
-                  key={cat.name}
-                  onClick={() => navigate('/customer/create-list')}
-                  className="flex items-center space-x-2 p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all text-left min-h-touch"
+                  onClick={() => navigate('/customer/create-list', { state: { items: order.items } })}
+                  className="text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-1 min-h-touch pt-1 border-t border-gray-100 dark:border-gray-700"
                 >
-                  <span className="text-xl">{cat.icon}</span>
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate">{cat.name}</span>
+                  <RotateCcw className="w-3.5 h-3.5" /> Reorder Items
                 </button>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
+        </Card>
+      )}
 
-          {/* Recommended / Popular Items */}
+      {/* 5. Buy Again Section */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 className="font-extrabold text-lg text-gray-900 dark:text-white mb-3">⭐ Popular Products</h3>
-            <div className="grid grid-cols-2 gap-3">
-              {popularProducts.slice(0, 2).map(product => (
-                <ProductCard key={product.id} product={product} onAdd={(p) => setSelectedProduct(p)} />
-              ))}
-            </div>
+            <h2 className="font-extrabold text-lg md:text-xl text-gray-900 dark:text-white flex items-center gap-2">
+              <Heart className="w-5 h-5 text-rose-500 fill-rose-500" /> Buy Again
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Your usual household items</p>
           </div>
-
         </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
+          {buyAgainProducts.map(product => (
+            <ProductCard key={product.id} product={product} onAdd={(p) => setSelectedProduct(p)} />
+          ))}
+        </div>
+      </div>
 
+      {/* 6. Popular Household Categories */}
+      <Card className="p-4 md:p-5">
+        <h2 className="font-extrabold text-lg text-gray-900 dark:text-white mb-3">Popular Categories</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+          {CATEGORIES.slice(0, 6).map(cat => (
+            <button
+              key={cat.name}
+              onClick={() => navigate('/customer/create-list')}
+              className="flex flex-col items-center justify-center p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-2xl transition-all border border-gray-100 dark:border-gray-700 min-h-touch"
+            >
+              <span className="text-3xl mb-1">{cat.icon}</span>
+              <span className="text-xs font-bold text-gray-800 dark:text-gray-200 text-center leading-tight">{cat.name}</span>
+            </button>
+          ))}
+        </div>
+      </Card>
+
+      {/* 7. Recommended Products */}
+      <div>
+        <h2 className="font-extrabold text-lg md:text-xl text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-amber-500" /> Recommended For You
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
+          {popularProducts.map(product => (
+            <ProductCard key={product.id} product={product} onAdd={(p) => setSelectedProduct(p)} />
+          ))}
+        </div>
       </div>
 
       {selectedProduct && (
