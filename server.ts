@@ -112,13 +112,13 @@ app.post('/api/gemini/parse-image', async (req, res) => {
 });
 
 async function setupApp() {
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
-  } else {
+  } else if (!process.env.VERCEL) {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
@@ -127,7 +127,9 @@ async function setupApp() {
   }
 }
 
-setupApp();
+if (!process.env.VERCEL) {
+  setupApp();
+}
 
 // Export app instance so Vercel Serverless Function engine can wrap and execute routing
 export default app;
