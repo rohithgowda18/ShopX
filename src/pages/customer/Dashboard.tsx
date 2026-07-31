@@ -94,8 +94,6 @@ export default function CustomerDashboard() {
         />
       </div>
 
-      {/* Primary App Installation Banner */}
-      <InstallAppButton />
 
       {/* 3. Primary User Action Cards with Friendly Indian Household Context */}
       <div>

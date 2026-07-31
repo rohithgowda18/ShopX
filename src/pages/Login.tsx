@@ -4,6 +4,7 @@ import { auth } from '../firebase/config';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { Mail, Phone, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import InstallAppButton from '../components/ui/InstallAppButton';
 
 export default function Login() {
   const [loginMethod, setLoginMethod] = useState<'email' | 'phone'>('email');
@@ -115,6 +116,11 @@ export default function Login() {
           </div>
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Kirana AI</h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Your smart grocery assistant</p>
+        </div>
+
+        {/* Top-Right Install App Trigger for Login Page */}
+        <div className="flex justify-end mb-4">
+          <InstallAppButton />
         </div>
 
         {/* Tab Switcher: Primary Email, Secondary Phone */}
