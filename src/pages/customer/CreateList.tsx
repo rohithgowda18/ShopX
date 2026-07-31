@@ -67,22 +67,34 @@ export default function CreateList() {
   const processVoiceText = async () => {
     if (!voiceText) return;
     try {
-      const parsedItems = parseVoiceInput(voiceText);
-      if (parsedItems.length > 0) {
-        const newItems: OrderItem[] = parsedItems.map(pi => ({
-          name: pi.product.englishName,
-          quantity: pi.quantity,
-          unit: pi.unit as Unit,
-        }));
+      console.log('[DEBUG Client] Sending raw voice transcript to server parsing engine:', voiceText);
+      const response = await fetch('/api/gemini/parse-list', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: voiceText })
+      });
+
+      const parsedItems = await response.json();
+      console.log('[DEBUG Client] Received parsed items array from Gemini:', parsedItems);
+
+      if (Array.isArray(parsedItems) && parsedItems.length > 0) {
+        const newItems: OrderItem[] = parsedItems.map(pi => {
+          console.log(`[DEBUG Client] Processing item: Name=${pi.name}, Qty=${pi.quantity}, Unit=${pi.unit}`);
+          return {
+            name: pi.name || 'Unknown Item',
+            quantity: Number(pi.quantity) || 1,
+            unit: (pi.unit || 'piece') as Unit,
+          };
+        });
         addItems(newItems);
-        toast.success('Added items from voice');
+        toast.success(`Successfully parsed ${newItems.length} items!`);
         setMode('cart');
       } else {
-        toast.error('Product not recognized');
+        toast.error('Could not recognize any items in voice input.');
       }
     } catch (error) {
-      console.error(error);
-      toast.error('Failed to process voice input');
+      console.error('[DEBUG Client] Voice parser API error:', error);
+      toast.error('Failed to connect to Indian grocery semantic parser');
     } finally {
       setVoiceText('');
       if (mode !== 'cart') setMode('browse');
