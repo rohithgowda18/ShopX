@@ -1,17 +1,24 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
-import './pwa';
+import { toast } from 'sonner';
 import App from './App.tsx';
 import './index.css';
 
-// Register Service Worker for PWA auto updates and offline capability
+// Register Service Worker with clean update notifications
 const updateSW = registerSW({
   onNeedRefresh() {
-    console.log('[PWA] New content available, refresh needed');
+    toast('New update available!', {
+      description: 'Click reload to update Kirana AI to the latest version.',
+      action: {
+        label: 'Reload App',
+        onClick: () => updateSW(true),
+      },
+      duration: Infinity,
+    });
   },
   onOfflineReady() {
-    console.log('[PWA] App is ready to work offline');
+    console.log('[PWA] Kirana AI is ready for offline use.');
   },
 });
 
