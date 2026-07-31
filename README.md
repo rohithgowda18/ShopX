@@ -1,46 +1,50 @@
-# Kirana AI 🛒🤖
+# Namma Angadi 🛒🤖
 
-Kirana AI is a modern, AI-powered local grocery shopping and store management application designed to bridge local Kirana stores with customers.
+Namma Angadi (formerly Kirana AI) is a premium, AI-powered local grocery shopping and store management application designed to connect local Kirana stores with customers. The application is built as a Progressive Web App (PWA) to behave indistinguishably from a native mobile application.
 
-## Features
+For a detailed breakdown of architectural decisions, parsing models, and PWA capabilities, check out [Technical Overview](overview.md).
 
-- **Voice & Text Item Parsing**: Uses Gemini AI to understand natural language shopping lists in English and regional languages (e.g., Kannada transliterations).
-- **Customer Portal**: Create grocery lists, select local stores, track orders in real-time, and manage profiles.
-- **Shop Owner Dashboard**: Manage incoming customer orders, manage product catalog and inventory, and import new products seamlessly.
-- **Admin Catalog Management**: Maintain master catalogs and category definitions.
+## Core Features
+
+- **Progressive Web App (PWA)**: Launches in fullscreen standalone mode (`display: standalone`) without any browser URL bars, supports offline shell serving, and triggers native 1-tap browser installation dialogs.
+- **Multilingual Semantic Voice Parsing**: Transcribes speech (English, Hindi, Kannada) and maps regional terms (e.g. *"akki"*, *"doodh"*, *"halu"*) to standard inventory products using Google's Gemini API.
+- **Image Scanner (OCR)**: Analyzes photographs of handwritten shopping lists, printed checkout bills, and chat screenshots, extracting structured items directly to the shopping list.
+- **Indian Localized Catalog**: Database containing common daily grocery products, regional translations, and optimized packaging sizes.
+- **Safe-Area Layouts**: Design utilizes CSS notches (`safe-area-inset`) and 48px touch targets to provide an Android/iOS native app experience.
 
 ## Tech Stack
 
-- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, Lucide Icons, Motion
-- **Backend / Server**: Express, Node.js (via `server.ts`)
-- **AI Integration**: Google GenAI SDK (`@google/genai`)
-- **Database & Auth**: Firebase Auth & Firestore
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons, Motion
+- **Service Worker Compilation**: Workbox (`vite-plugin-pwa`)
+- **Backend Server**: Node.js & Express (`server.ts`)
+- **AI Model SDK**: Google GenAI SDK (`@google/genai` using `gemini-2.5-flash`)
+- **Database & Auth**: Firebase Authentication & Cloud Firestore
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v18+ recommended)
-- npm or bun
+- Node.js (v18+)
+- npm or yarn
 
 ### Setup & Installation
 
-1. Install dependencies:
+1. Install local dependencies:
    ```bash
    npm install
    ```
 
-2. Configure environment variables in `.env` or `.env.local`:
+2. Create a `.env` file in the root directory:
    ```env
    GEMINI_API_KEY=your_gemini_api_key_here
    ```
 
-3. Run the development server:
+3. Launch the development server:
    ```bash
    npm run dev
    ```
 
-4. Build for production:
+4. Build production files:
    ```bash
    npm run build
    ```

@@ -22,6 +22,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const isDevRef = useRef(false);
 
   useEffect(() => {
+    // Check if there is a persisted mock developer login session
+    const persistedProfileStr = localStorage.getItem('namma_angadi_dev_profile');
+    const persistedUserStr = localStorage.getItem('namma_angadi_dev_user');
+    
+    if (persistedProfileStr && persistedUserStr) {
+      try {
+        const persistedProfile = JSON.parse(persistedProfileStr);
+        const persistedUser = JSON.parse(persistedUserStr);
+        isDevRef.current = true;
+        setCurrentUser(persistedUser as User);
+        setUserProfile(persistedProfile as UserProfile);
+        setLoading(false);
+        return; // Skip Firebase auth check during active mock dev session
+      } catch (e) {
+        console.error('Failed to parse persisted dev session', e);
+      }
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (isDevRef.current) return;
       setCurrentUser(user);
@@ -71,19 +89,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     isDevRef.current = true;
     const mockUid = 'dev-' + role;
     const mockUser = { uid: mockUid, displayName: 'Dev ' + role, phoneNumber: '+910000000000' } as User;
-    setCurrentUser(mockUser);
-    setUserProfile({
+    const mockProfile = {
       id: mockUid,
       name: 'Dev ' + (role === 'customer' ? 'Customer' : 'Shop Owner'),
       phone: '+910000000000',
       role,
-      preferredLanguage: 'en',
+      preferredLanguage: 'en' as const,
       createdAt: Date.now(),
-    });
+    };
+    setCurrentUser(mockUser);
+    setUserProfile(mockProfile);
+    localStorage.setItem('namma_angadi_dev_profile', JSON.stringify(mockProfile));
+    localStorage.setItem('namma_angadi_dev_user', JSON.stringify({ uid: mockUid, displayName: mockUser.displayName }));
     setLoading(false);
   };
 
   const signOut = async () => {
+    localStorage.removeItem('namma_angadi_dev_profile');
+    localStorage.removeItem('namma_angadi_dev_user');
     if (isDevRef.current) {
       isDevRef.current = false;
       setCurrentUser(null);
