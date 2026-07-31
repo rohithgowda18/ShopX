@@ -256,28 +256,6 @@ export default function Login() {
         )}
 
         <div id="recaptcha-container"></div>
-        
-        {import.meta.env.DEV && (
-          <div className="mt-8 border-t dark:border-gray-700 pt-6">
-            <p className="text-xs text-gray-500 dark:text-gray-400 text-center mb-4 uppercase tracking-wider font-bold">Developer Mode</p>
-            <div className="flex space-x-3">
-              <button
-                type="button"
-                onClick={() => handleDevLogin('customer')}
-                className="flex-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium py-2 rounded-xl text-sm border border-blue-200 dark:border-blue-900 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
-              >
-                Dev Customer
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDevLogin('shop_owner')}
-                className="flex-1 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 font-medium py-2 rounded-xl text-sm border border-orange-200 dark:border-orange-900 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors"
-              >
-                Dev Shop
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
