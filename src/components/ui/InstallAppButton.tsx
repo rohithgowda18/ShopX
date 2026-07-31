@@ -10,7 +10,7 @@ export default function InstallAppModalTrigger() {
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    // Check if running in standalone mode (installed)
+    // Check standalone mode (already installed PWA)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
     if (isStandalone) {
       setIsInstalled(true);
@@ -20,9 +20,7 @@ export default function InstallAppModalTrigger() {
     const iosDevice = /iphone|ipad|ipod/.test(userAgent);
     setIsIOS(iosDevice);
 
-    // Subscribe to early global PWA install prompt state
     const unsubscribe = subscribeInstallPrompt((prompt) => {
-      console.log('[PWA Component] Received updated install prompt event:', !!prompt);
       setDeferredPrompt(prompt);
       if (!prompt && isStandalone) {
         setIsInstalled(true);
@@ -35,12 +33,10 @@ export default function InstallAppModalTrigger() {
   const handleInstallConfirm = async () => {
     const promptEvent = deferredPrompt || getDeferredInstallPrompt();
     if (promptEvent) {
-      console.log('[PWA Component] Calling prompt() on captured beforeinstallprompt event');
       setShowModal(false);
       try {
         await promptEvent.prompt();
         const choice = await promptEvent.userChoice;
-        console.log('[PWA Component] userChoice outcome:', choice.outcome);
         if (choice.outcome === 'accepted') {
           setIsInstalled(true);
         }
@@ -50,10 +46,13 @@ export default function InstallAppModalTrigger() {
         setDeferredPrompt(null);
       }
     } else {
-      console.log('[PWA Component] beforeinstallprompt event not captured yet, displaying fallback guidance');
       setShowModal(false);
-      if (isIOS) {
-        alert('To install on iPhone/iPad:\n1. Tap the Share icon in Safari (bottom toolbar)\n2. Scroll down & select "Add to Home Screen" 📲');
+      
+      // Check if Chrome has native install capability or triggered Chrome menu
+      if ('serviceWorker' in navigator && (window as any).BeforeInstallPromptEvent) {
+        alert('Chrome is preparing the app installation. Please wait a few seconds, or open Chrome menu (⋮) and tap "Install app"!');
+      } else if (isIOS) {
+        alert('To install on iPhone/iPad:\n1. Tap Share icon in Safari (bottom toolbar)\n2. Scroll down & select "Add to Home Screen" 📲');
       } else {
         alert('To install Kirana AI:\n1. Open your browser menu (⋮ or ⊕ at top right)\n2. Tap "Install app" or "Add to Home screen".');
       }
@@ -67,10 +66,7 @@ export default function InstallAppModalTrigger() {
       {/* Header Button / Trigger */}
       <button
         type="button"
-        onClick={() => {
-          console.log('[PWA Component] Install App button clicked. Prompt available?', !!(deferredPrompt || getDeferredInstallPrompt()));
-          setShowModal(true);
-        }}
+        onClick={() => setShowModal(true)}
         className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold min-h-touch"
         title="Install Kirana AI App"
         aria-label="Install Kirana AI App"
