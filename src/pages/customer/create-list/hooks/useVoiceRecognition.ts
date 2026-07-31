@@ -17,15 +17,27 @@ export function useVoiceRecognition(onFinalResult?: (transcript: string) => void
         recognitionRef.current.lang = voiceLang;
 
         recognitionRef.current.onresult = (event: any) => {
-          let finalTranscript = '';
+          let accumulatedFinal = '';
+          let interimTranscript = '';
           for (let i = event.resultIndex; i < event.results.length; ++i) {
+            const transcriptSegment = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
-              finalTranscript += event.results[i][0].transcript;
+              accumulatedFinal += transcriptSegment;
+            } else {
+              interimTranscript += transcriptSegment;
             }
           }
-          if (finalTranscript) {
-            setVoiceText(prev => prev + (prev ? ' ' : '') + finalTranscript);
-            if (onFinalResult) onFinalResult(finalTranscript);
+          if (accumulatedFinal) {
+            setVoiceText(prev => {
+              // Ensure we don't append duplicate final phrases if browser fires multiple final triggers
+              const cleanPrev = prev.trim();
+              const cleanFinal = accumulatedFinal.trim();
+              if (cleanPrev.endsWith(cleanFinal)) {
+                return cleanPrev;
+              }
+              return cleanPrev ? `${cleanPrev} ${cleanFinal}` : cleanFinal;
+            });
+            if (onFinalResult) onFinalResult(accumulatedFinal);
           }
         };
 
