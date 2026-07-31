@@ -129,15 +129,16 @@ export default function AppLayout() {
           </div>
           <h1 className="text-xl font-bold text-gray-800 dark:text-white tracking-tight">Kirana AI</h1>
         </div>
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-2">
           {!isInstalled && (
             <button
               onClick={handleInstallClick}
-              className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-gray-700 p-2 rounded-xl transition-colors min-h-touch min-w-touch flex items-center justify-center"
-              title="Install App"
-              aria-label="Install App"
+              className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold min-h-touch"
+              title="Install Kirana AI App"
+              aria-label="Install Kirana AI App"
             >
-              <Download className="w-5 h-5" />
+              <Download className="w-4 h-4" />
+              <span>Install App</span>
             </button>
           )}
           <button 

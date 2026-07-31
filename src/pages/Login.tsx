@@ -118,8 +118,8 @@ export default function Login() {
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Your smart grocery assistant</p>
         </div>
 
-        {/* Top-Right Install App Trigger for Login Page */}
-        <div className="flex justify-end mb-4">
+        {/* Prominent Install App Trigger for Login Page */}
+        <div className="flex justify-center mb-6">
           <InstallAppButton />
         </div>
 

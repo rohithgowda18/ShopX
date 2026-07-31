@@ -11,6 +11,12 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
+        injectRegister: 'auto',
+        devOptions: {
+          enabled: true,
+          type: 'module',
+          suppressWarnings: true,
+        },
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon.svg', 'icons/*.png'],
         manifest: {
           name: 'Kirana AI',
@@ -21,6 +27,8 @@ export default defineConfig(() => {
           display: 'standalone',
           orientation: 'portrait',
           start_url: '/',
+          scope: '/',
+          id: '/',
           icons: [
             {
               src: '/icons/icon-72x72.png',
@@ -50,7 +58,8 @@ export default defineConfig(() => {
             {
               src: '/icons/icon-192x192.png',
               sizes: '192x192',
-              type: 'image/png'
+              type: 'image/png',
+              purpose: 'any'
             },
             {
               src: '/icons/icon-384x384.png',
@@ -60,7 +69,8 @@ export default defineConfig(() => {
             {
               src: '/icons/icon-512x512.png',
               sizes: '512x512',
-              type: 'image/png'
+              type: 'image/png',
+              purpose: 'any'
             },
             {
               src: '/icons/maskable-icon.png',

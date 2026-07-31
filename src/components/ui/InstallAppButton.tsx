@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Download, X, Smartphone, CheckCircle, ShieldCheck } from 'lucide-react';
+import { Download, X, ShieldCheck } from 'lucide-react';
 import { Button } from './DesignSystem';
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-}
+import { getDeferredInstallPrompt, subscribeInstallPrompt } from '../../pwa';
 
 export default function InstallAppModalTrigger() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState(getDeferredInstallPrompt());
   const [isInstalled, setIsInstalled] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
+    // Check if running in standalone mode (installed)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
     if (isStandalone) {
       setIsInstalled(true);
@@ -23,41 +20,42 @@ export default function InstallAppModalTrigger() {
     const iosDevice = /iphone|ipad|ipod/.test(userAgent);
     setIsIOS(iosDevice);
 
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-    };
+    // Subscribe to early global PWA install prompt state
+    const unsubscribe = subscribeInstallPrompt((prompt) => {
+      console.log('[PWA Component] Received updated install prompt event:', !!prompt);
+      setDeferredPrompt(prompt);
+      if (!prompt && isStandalone) {
+        setIsInstalled(true);
+      }
+    });
 
-    const handleAppInstalled = () => {
-      setIsInstalled(true);
-      setDeferredPrompt(null);
-      setShowModal(false);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
-    };
+    return () => unsubscribe();
   }, []);
 
   const handleInstallConfirm = async () => {
-    if (deferredPrompt) {
+    const promptEvent = deferredPrompt || getDeferredInstallPrompt();
+    if (promptEvent) {
+      console.log('[PWA Component] Calling prompt() on captured beforeinstallprompt event');
       setShowModal(false);
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setIsInstalled(true);
+      try {
+        await promptEvent.prompt();
+        const choice = await promptEvent.userChoice;
+        console.log('[PWA Component] userChoice outcome:', choice.outcome);
+        if (choice.outcome === 'accepted') {
+          setIsInstalled(true);
+        }
+      } catch (err) {
+        console.error('[PWA Component] Error executing native install prompt:', err);
+      } finally {
+        setDeferredPrompt(null);
       }
-      setDeferredPrompt(null);
     } else {
+      console.log('[PWA Component] beforeinstallprompt event not captured yet, displaying fallback guidance');
       setShowModal(false);
       if (isIOS) {
-        alert('To install on iPhone/iPad: Tap the Share button in Safari and select "Add to Home Screen" 📲');
+        alert('To install on iPhone/iPad:\n1. Tap the Share icon in Safari (bottom toolbar)\n2. Scroll down & select "Add to Home Screen" 📲');
       } else {
-        alert('To install app: Open your browser menu (⋮ or ⊕) and tap "Install app" or "Add to Home screen".');
+        alert('To install Kirana AI:\n1. Open your browser menu (⋮ or ⊕ at top right)\n2. Tap "Install app" or "Add to Home screen".');
       }
     }
   };
@@ -66,23 +64,26 @@ export default function InstallAppModalTrigger() {
 
   return (
     <>
-      {/* Top Header Download Trigger Icon */}
+      {/* Header Button / Trigger */}
       <button
         type="button"
-        onClick={() => setShowModal(true)}
-        className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-gray-700/60 p-2 rounded-xl transition-colors min-h-touch min-w-touch flex items-center justify-center relative"
+        onClick={() => {
+          console.log('[PWA Component] Install App button clicked. Prompt available?', !!(deferredPrompt || getDeferredInstallPrompt()));
+          setShowModal(true);
+        }}
+        className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold min-h-touch"
         title="Install Kirana AI App"
         aria-label="Install Kirana AI App"
       >
-        <Download className="w-5 h-5 animate-pulse text-emerald-600 dark:text-emerald-400" />
+        <Download className="w-4 h-4" />
+        <span>Install App</span>
       </button>
 
-      {/* Modern Confirmation Modal Prompt (Cancel / Download) */}
+      {/* Confirmation Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
           <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-gray-100 dark:border-gray-700 space-y-5 transition-colors">
             
-            {/* Modal Icon & Header */}
             <div className="flex items-start justify-between">
               <div className="w-14 h-14 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shadow-lg font-bold text-2xl">
                 K
@@ -95,7 +96,6 @@ export default function InstallAppModalTrigger() {
               </button>
             </div>
 
-            {/* Modal Body */}
             <div>
               <h3 className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                 Install Kirana AI?
@@ -105,7 +105,6 @@ export default function InstallAppModalTrigger() {
               </p>
             </div>
 
-            {/* Feature Highlights */}
             <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-2xl border border-emerald-100 dark:border-emerald-900/40 space-y-1.5 text-xs text-emerald-800 dark:text-emerald-300 font-semibold">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" /> Instant Home Screen Access
@@ -115,7 +114,6 @@ export default function InstallAppModalTrigger() {
               </div>
             </div>
 
-            {/* Action Buttons: Cancel vs Download */}
             <div className="flex space-x-3 pt-1">
               <Button
                 type="button"

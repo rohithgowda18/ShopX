@@ -110,7 +110,7 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Secondary App Install Banner */}
+        {/* Install Kirana AI App */}
         <div className="p-4 md:p-5">
           <InstallAppButton />
         </div>
