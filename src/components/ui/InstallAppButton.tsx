@@ -1,25 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Smartphone, CheckCircle, Info } from 'lucide-react';
-import { Card, Button } from './DesignSystem';
+import { Download, X, Smartphone, CheckCircle, ShieldCheck } from 'lucide-react';
+import { Button } from './DesignSystem';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-export default function InstallAppButton() {
+export default function InstallAppModalTrigger() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    // Detect if app is already running as PWA (standalone mode)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
     if (isStandalone) {
       setIsInstalled(true);
     }
 
-    // Detect iOS devices
     const userAgent = window.navigator.userAgent.toLowerCase();
     const iosDevice = /iphone|ipad|ipod/.test(userAgent);
     setIsIOS(iosDevice);
@@ -32,6 +31,7 @@ export default function InstallAppButton() {
     const handleAppInstalled = () => {
       setIsInstalled(true);
       setDeferredPrompt(null);
+      setShowModal(false);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -43,55 +43,101 @@ export default function InstallAppButton() {
     };
   }, []);
 
-  const handleInstallClick = async () => {
+  const handleInstallConfirm = async () => {
     if (deferredPrompt) {
+      setShowModal(false);
       await deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
         setIsInstalled(true);
       }
       setDeferredPrompt(null);
-    } else if (isIOS) {
-      alert('To install on iPhone/iPad: Tap the Share button in Safari and select "Add to Home Screen" 📲');
     } else {
-      alert('To install on Desktop/Android: Open your browser menu (⋮ or ⊕) and tap "Install app" or "Add to Home screen".');
+      setShowModal(false);
+      if (isIOS) {
+        alert('To install on iPhone/iPad: Tap the Share button in Safari and select "Add to Home Screen" 📲');
+      } else {
+        alert('To install app: Open your browser menu (⋮ or ⊕) and tap "Install app" or "Add to Home screen".');
+      }
     }
   };
 
-  if (isInstalled) {
-    return (
-      <Card className="p-4 bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center">
-            <CheckCircle className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="font-bold text-sm text-gray-900 dark:text-white">Kirana AI Installed</h4>
-            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Running in native app mode</p>
-          </div>
-        </div>
-      </Card>
-    );
-  }
+  if (isInstalled) return null;
 
   return (
-    <Card className="p-5 border-2 border-emerald-500/40 dark:border-emerald-500/60 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-100/50 dark:from-emerald-950/50 dark:via-teal-950/40 dark:to-emerald-900/30 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-      <div className="flex items-start space-x-3.5">
-        <div className="w-12 h-12 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shadow-md shrink-0 text-xl">
-          📱
+    <>
+      {/* Top Header Download Trigger Icon */}
+      <button
+        type="button"
+        onClick={() => setShowModal(true)}
+        className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-gray-700/60 p-2 rounded-xl transition-colors min-h-touch min-w-touch flex items-center justify-center relative"
+        title="Install Kirana AI App"
+        aria-label="Install Kirana AI App"
+      >
+        <Download className="w-5 h-5 animate-pulse text-emerald-600 dark:text-emerald-400" />
+      </button>
+
+      {/* Modern Confirmation Modal Prompt (Cancel / Download) */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-gray-100 dark:border-gray-700 space-y-5 transition-colors">
+            
+            {/* Modal Icon & Header */}
+            <div className="flex items-start justify-between">
+              <div className="w-14 h-14 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shadow-lg font-bold text-2xl">
+                K
+              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div>
+              <h3 className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+                Install Kirana AI?
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1 leading-relaxed">
+                Add Kirana AI to your home screen for instant 1-tap grocery list creation, offline support, and full-screen speed.
+              </p>
+            </div>
+
+            {/* Feature Highlights */}
+            <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-2xl border border-emerald-100 dark:border-emerald-900/40 space-y-1.5 text-xs text-emerald-800 dark:text-emerald-300 font-semibold">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" /> Instant Home Screen Access
+              </div>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" /> Fast Offline List Storage
+              </div>
+            </div>
+
+            {/* Action Buttons: Cancel vs Download */}
+            <div className="flex space-x-3 pt-1">
+              <Button
+                type="button"
+                onClick={() => setShowModal(false)}
+                variant="outline"
+                className="flex-1 text-gray-700 dark:text-gray-300 py-3"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleInstallConfirm}
+                variant="primary"
+                className="flex-1 py-3 shadow-md flex items-center justify-center gap-2"
+              >
+                <Download className="w-4 h-4" /> Download
+              </Button>
+            </div>
+
+          </div>
         </div>
-        <div>
-          <h4 className="font-extrabold text-base text-gray-900 dark:text-white flex items-center gap-2">
-            Install Kirana AI
-          </h4>
-          <p className="text-xs text-gray-600 dark:text-gray-300 font-medium mt-1 leading-relaxed max-w-lg">
-            Install the app on your phone for faster access, offline support, and a full-screen experience.
-          </p>
-        </div>
-      </div>
-      <Button onClick={handleInstallClick} variant="primary" size="md" className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2 py-3 px-5 shadow-md">
-        <Download className="w-4 h-4" /> {deferredPrompt ? 'Install App' : 'How to Install'}
-      </Button>
-    </Card>
+      )}
+    </>
   );
 }
