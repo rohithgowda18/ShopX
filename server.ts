@@ -8,14 +8,11 @@ dotenv.config();
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || 'placeholder' });
 
-async function startServer() {
-  const app = express();
-  const PORT = Number(process.env.PORT) || 3000;
+const app = express();
+app.use(express.json({ limit: '50mb' }));
 
-  app.use(express.json({ limit: '50mb' }));
-
-  // Refined Prompt for parsing unstructured/semi-structured voice transcription or images of lists
-  const systemPrompt = `You are an expert AI assistant for Namma Angadi (local grocery shopping application for Indian households).
+// Refined Prompt for parsing unstructured/semi-structured voice transcription or images of lists
+const systemPrompt = `You are an expert AI assistant for Namma Angadi (local grocery shopping application for Indian households).
 Your task is to parse unstructured grocery lists from speech transcripts (transcribed in English, Hindi, Kannada, or mixed language) or OCR image text, and extract a structured array of grocery items.
 
 Analyze the text and extract items. For each item, you must output:
@@ -47,73 +44,74 @@ Example output:
   {"name": "Maggi Noodles", "quantity": 2, "unit": "packet"}
 ]`;
 
-  app.post('/api/gemini/parse-list', async (req, res) => {
-    try {
-      const { text } = req.body;
-      if (!text) {
-        return res.status(400).json({ error: 'Text input is required' });
-      }
-
-      console.log('[DEBUG Server] Raw voice/text input received:', text);
-
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: `Input list to parse: "${text}"`,
-        config: {
-          systemInstruction: systemPrompt,
-          responseMimeType: 'application/json',
-          temperature: 0.1,
-        }
-      });
-
-      const jsonStr = (response.text || '[]').trim();
-      console.log('[DEBUG Server] Gemini raw JSON response:', jsonStr);
-      
-      const parsed = JSON.parse(jsonStr);
-      console.log('[DEBUG Server] Parsed items returned to client:', parsed);
-      
-      res.json(parsed);
-    } catch (error) {
-      console.error('Error parsing list:', error);
-      res.status(500).json({ error: 'Failed to parse list' });
+app.post('/api/gemini/parse-list', async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) {
+      return res.status(400).json({ error: 'Text input is required' });
     }
-  });
 
-  app.post('/api/gemini/parse-image', async (req, res) => {
-    try {
-      const { base64Image, mimeType } = req.body;
-      if (!base64Image) {
-        return res.status(400).json({ error: 'Image is required' });
+    console.log('[DEBUG Server] Raw voice/text input received:', text);
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `Input list to parse: "${text}"`,
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: 'application/json',
+        temperature: 0.1,
       }
+    });
 
-      console.log('[DEBUG Server] Image parsing request received');
+    const jsonStr = (response.text || '[]').trim();
+    console.log('[DEBUG Server] Gemini raw JSON response:', jsonStr);
+    
+    const parsed = JSON.parse(jsonStr);
+    console.log('[DEBUG Server] Parsed items returned to client:', parsed);
+    
+    res.json(parsed);
+  } catch (error) {
+    console.error('Error parsing list:', error);
+    res.status(500).json({ error: 'Failed to parse list' });
+  }
+});
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [
-          { text: "Parse all items, quantities, and units from this image (handwritten grocery lists, printed lists, bills/receipts, or WhatsApp screenshots)." },
-          { inlineData: { data: base64Image, mimeType: mimeType || 'image/jpeg' } }
-        ],
-        config: {
-          systemInstruction: systemPrompt,
-          responseMimeType: 'application/json',
-          temperature: 0.1,
-        }
-      });
-
-      const jsonStr = (response.text || '[]').trim();
-      console.log('[DEBUG Server] Gemini raw Image JSON response:', jsonStr);
-
-      const parsed = JSON.parse(jsonStr);
-      console.log('[DEBUG Server] Parsed Image items returned to client:', parsed);
-
-      res.json(parsed);
-    } catch (error) {
-      console.error('Error parsing image:', error);
-      res.status(500).json({ error: 'Failed to parse image' });
+app.post('/api/gemini/parse-image', async (req, res) => {
+  try {
+    const { base64Image, mimeType } = req.body;
+    if (!base64Image) {
+      return res.status(400).json({ error: 'Image is required' });
     }
-  });
 
+    console.log('[DEBUG Server] Image parsing request received');
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [
+        { text: "Parse all items, quantities, and units from this image (handwritten grocery lists, printed lists, bills/receipts, or WhatsApp screenshots)." },
+        { inlineData: { data: base64Image, mimeType: mimeType || 'image/jpeg' } }
+      ],
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: 'application/json',
+        temperature: 0.1,
+      }
+    });
+
+    const jsonStr = (response.text || '[]').trim();
+    console.log('[DEBUG Server] Gemini raw Image JSON response:', jsonStr);
+
+    const parsed = JSON.parse(jsonStr);
+    console.log('[DEBUG Server] Parsed Image items returned to client:', parsed);
+
+    res.json(parsed);
+  } catch (error) {
+    console.error('Error parsing image:', error);
+    res.status(500).json({ error: 'Failed to parse image' });
+  }
+});
+
+async function setupApp() {
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -127,7 +125,15 @@ Example output:
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
+}
 
+setupApp();
+
+// Export app instance so Vercel Serverless Function engine can wrap and execute routing
+export default app;
+
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  const PORT = Number(process.env.PORT) || 3000;
   const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
@@ -144,5 +150,3 @@ Example output:
     }
   });
 }
-
-startServer();
