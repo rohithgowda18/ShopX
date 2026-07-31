@@ -1,0 +1,22 @@
+import { Product } from '../types';
+
+export const fr_products: Product[] = [
+  { id: 'fr0', englishName: "Banana (Yelakki)", kannadaName: "ಏಲಕ್ಕಿ ಬಾಳೆಹಣ್ಣು", transliteration: "Yelakki Balehannu", aliases: ["banana (yelakki)", "ಏಲಕ್ಕಿ ಬಾಳೆಹಣ್ಣು", "yelakki balehannu"], category: 'Fruits', price: 80, defaultUnit: 'kg', availableUnits: ['500g', '1kg'], image: '🍌', popular: true },
+  { id: 'fr1', englishName: "Banana (Robusta)", kannadaName: "ಪಚ್ಚಬಾಳೆಹಣ್ಣು", transliteration: "Pachchabalehannu", aliases: ["banana (robusta)", "ಪಚ್ಚಬಾಳೆಹಣ್ಣು", "pachchabalehannu"], category: 'Fruits', price: 40, defaultUnit: 'kg', availableUnits: ['500g', '1kg'], image: '🍌', popular: true },
+  { id: 'fr2', englishName: "Apple", kannadaName: "ಸೇಬು", transliteration: "Sebu", aliases: ["apple", "ಸೇಬು", "sebu"], category: 'Fruits', price: 150, defaultUnit: 'kg', availableUnits: ['500g', '1kg'], image: '🍎', popular: true },
+  { id: 'fr3', englishName: "Orange", kannadaName: "ಕಿತ್ತಳೆ", transliteration: "Kittale", aliases: ["orange", "ಕಿತ್ತಳೆ", "kittale"], category: 'Fruits', price: 80, defaultUnit: 'kg', availableUnits: ['500g', '1kg'], image: '🍊', popular: true },
+  { id: 'fr4', englishName: "Mosambi (Sweet Lime)", kannadaName: "ಮೂಸಂಬಿ", transliteration: "Mosambi", aliases: ["mosambi (sweet lime)", "ಮೂಸಂಬಿ", "mosambi"], category: 'Fruits', price: 60, defaultUnit: 'kg', availableUnits: ['500g', '1kg'], image: '🍎' },
+  { id: 'fr5', englishName: "Pomegranate", kannadaName: "ದಾಳಿಂಬೆ", transliteration: "Dalimbe", aliases: ["pomegranate", "ದಾಳಿಂಬೆ", "dalimbe"], category: 'Fruits', price: 120, defaultUnit: 'kg', availableUnits: ['500g', '1kg'], image: '🍎' },
+  { id: 'fr6', englishName: "Papaya", kannadaName: "ಪಪ್ಪಾಯ", transliteration: "Papaya", aliases: ["papaya", "ಪಪ್ಪಾಯ", "papaya"], category: 'Fruits', price: 50, defaultUnit: 'piece', availableUnits: ['1'], image: '🥭' },
+  { id: 'fr7', englishName: "Watermelon", kannadaName: "ಕಲ್ಲಂಗಡಿ", transliteration: "Kallangadi", aliases: ["watermelon", "ಕಲ್ಲಂಗಡಿ", "kallangadi"], category: 'Fruits', price: 30, defaultUnit: 'piece', availableUnits: ['1'], image: '🍉' },
+  { id: 'fr8', englishName: "Muskmelon", kannadaName: "ಕರಬೂಜ", transliteration: "Kharbooja", aliases: ["muskmelon", "ಕರಬೂಜ", "kharbooja"], category: 'Fruits', price: 40, defaultUnit: 'piece', availableUnits: ['1'], image: '🍈' },
+  { id: 'fr9', englishName: "Grapes", kannadaName: "ದ್ರಾಕ್ಷಿ", transliteration: "Drakshi", aliases: ["grapes", "ದ್ರಾಕ್ಷಿ", "drakshi"], category: 'Fruits', price: 100, defaultUnit: 'kg', availableUnits: ['500g', '1kg'], image: '🍇' },
+  { id: 'fr10', englishName: "Mango (Alphonso)", kannadaName: "ಬಾದಾಮಿ ಮಾವು", transliteration: "Badami Mavu", aliases: ["mango (alphonso)", "ಬಾದಾಮಿ ಮಾವು", "badami mavu"], category: 'Fruits', price: 150, defaultUnit: 'kg', availableUnits: ['1kg'], image: '🥭' },
+  { id: 'fr11', englishName: "Mango (Totapuri)", kannadaName: "ತೋತಾಪುರಿ ಮಾವು", transliteration: "Totapuri Mavu", aliases: ["mango (totapuri)", "ತೋತಾಪುರಿ ಮಾವು", "totapuri mavu"], category: 'Fruits', price: 60, defaultUnit: 'kg', availableUnits: ['1kg'], image: '🥭' },
+  { id: 'fr12', englishName: "Guava", kannadaName: "ಸೀಬೆಹಣ್ಣು", transliteration: "Seebehannu", aliases: ["guava", "ಸೀಬೆಹಣ್ಣು", "seebehannu"], category: 'Fruits', price: 80, defaultUnit: 'kg', availableUnits: ['500g', '1kg'], image: '🍎' },
+  { id: 'fr13', englishName: "Sapota (Chikoo)", kannadaName: "ಸಪೋಟ", transliteration: "Sapota", aliases: ["sapota (chikoo)", "ಸಪೋಟ", "sapota"], category: 'Fruits', price: 60, defaultUnit: 'kg', availableUnits: ['500g', '1kg'], image: '🍎' },
+  { id: 'fr14', englishName: "Pineapple", kannadaName: "ಅನಾನಸ್", transliteration: "Ananas", aliases: ["pineapple", "ಅನಾನಸ್", "ananas"], category: 'Fruits', price: 50, defaultUnit: 'piece', availableUnits: ['1'], image: '🍍' },
+  { id: 'fr15', englishName: "Custard Apple", kannadaName: "ಸೀತಾಫಲ", transliteration: "Seetaphala", aliases: ["custard apple", "ಸೀತಾಫಲ", "seetaphala"], category: 'Fruits', price: 100, defaultUnit: 'kg', availableUnits: ['500g'], image: '🍎' },
+  { id: 'fr16', englishName: "Jackfruit", kannadaName: "ಹಲಸಿನ ಹಣ್ಣು", transliteration: "Halasina Hannu", aliases: ["jackfruit", "ಹಲಸಿನ ಹಣ್ಣು", "halasina hannu"], category: 'Fruits', price: 80, defaultUnit: 'kg', availableUnits: ['500g', '1kg'], image: '🍎' },
+  { id: 'fr17', englishName: "Fig", kannadaName: "ಅಂಜೂರ", transliteration: "Anjoora", aliases: ["fig", "ಅಂಜೂರ", "anjoora"], category: 'Fruits', price: 200, defaultUnit: 'kg', availableUnits: ['250g', '500g'], image: '🍎' },
+];

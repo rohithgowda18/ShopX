@@ -1,0 +1,13 @@
+import { Product } from '../types';
+
+export const oil_products: Product[] = [
+  { id: 'oil0', englishName: "Sunflower Oil", kannadaName: "ಸೂರ್ಯಕಾಂತಿ ಎಣ್ಣೆ", transliteration: "Suryakanti Enne", aliases: ["sunflower oil", "ಸೂರ್ಯಕಾಂತಿ ಎಣ್ಣೆ", "suryakanti enne"], category: 'Oils & Ghee', price: 120, defaultUnit: 'litre', availableUnits: ['500ml', '1L', '5L'], image: '🛢', brand: "Gold Winner", popular: true },
+  { id: 'oil1', englishName: "Groundnut Oil", kannadaName: "ಕಡಲೆಕಾಯಿ ಎಣ್ಣೆ", transliteration: "Kadalekayi Enne", aliases: ["groundnut oil", "ಕಡಲೆಕಾಯಿ ಎಣ್ಣೆ", "kadalekayi enne"], category: 'Oils & Ghee', price: 200, defaultUnit: 'litre', availableUnits: ['500ml', '1L', '5L'], image: '🛢', popular: true },
+  { id: 'oil2', englishName: "Coconut Oil", kannadaName: "ತೆಂಗಿನ ಎಣ್ಣೆ", transliteration: "Tengina Enne", aliases: ["coconut oil", "ತೆಂಗಿನ ಎಣ್ಣೆ", "tengina enne"], category: 'Oils & Ghee', price: 250, defaultUnit: 'litre', availableUnits: ['250ml', '500ml', '1L'], image: '🛢', brand: "Parachute", popular: true },
+  { id: 'oil3', englishName: "Sesame Oil", kannadaName: "ಎಳ್ಳೆಣ್ಣೆ", transliteration: "Ellenne", aliases: ["sesame oil", "ಎಳ್ಳೆಣ್ಣೆ", "ellenne"], category: 'Oils & Ghee', price: 300, defaultUnit: 'litre', availableUnits: ['250ml', '500ml', '1L'], image: '🛢', brand: "Idhayam" },
+  { id: 'oil4', englishName: "Mustard Oil", kannadaName: "ಸಾಸಿವೆ ಎಣ್ಣೆ", transliteration: "Sasive Enne", aliases: ["mustard oil", "ಸಾಸಿವೆ ಎಣ್ಣೆ", "sasive enne"], category: 'Oils & Ghee', price: 180, defaultUnit: 'litre', availableUnits: ['500ml', '1L'], image: '🛢', brand: "Fortune" },
+  { id: 'oil5', englishName: "Rice Bran Oil", kannadaName: "ರೈಸ್ ಬ್ರಾನ್ ಎಣ್ಣೆ", transliteration: "Rice Bran Enne", aliases: ["rice bran oil", "ರೈಸ್ ಬ್ರಾನ್ ಎಣ್ಣೆ", "rice bran enne"], category: 'Oils & Ghee', price: 140, defaultUnit: 'litre', availableUnits: ['1L', '5L'], image: '🛢', brand: "Fortune" },
+  { id: 'oil6', englishName: "Palm Oil", kannadaName: "ಪಾಮ್ ಎಣ್ಣೆ", transliteration: "Palm Enne", aliases: ["palm oil", "ಪಾಮ್ ಎಣ್ಣೆ", "palm enne"], category: 'Oils & Ghee', price: 100, defaultUnit: 'litre', availableUnits: ['1L'], image: '🛢' },
+  { id: 'oil7', englishName: "Olive Oil", kannadaName: "ಆಲಿವ್ ಎಣ್ಣೆ", transliteration: "Olive Enne", aliases: ["olive oil", "ಆಲಿವ್ ಎಣ್ಣೆ", "olive enne"], category: 'Oils & Ghee', price: 800, defaultUnit: 'litre', availableUnits: ['250ml', '500ml'], image: '🛢', brand: "Figaro" },
+  { id: 'oil8', englishName: "Gingelly Oil", kannadaName: "ಜಿಂಜೆಲ್ಲಿ ಎಣ್ಣೆ", transliteration: "Gingelly Enne", aliases: ["gingelly oil", "ಜಿಂಜೆಲ್ಲಿ ಎಣ್ಣೆ", "gingelly enne"], category: 'Oils & Ghee', price: 280, defaultUnit: 'litre', availableUnits: ['500ml', '1L'], image: '🛢' },
+];

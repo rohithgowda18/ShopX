@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function: returns true if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function: returns true if request is from document owner
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Helper function: returns true if authenticated user is admin
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Helper function: returns true if authenticated user is shop owner
+    function isShopOwner() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'shop_owner' || isAdmin());
+    }
+
+    // Users Collection: Users manage their own profiles; Admins have full access
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) || isAdmin();
+    }
+
+    // Master Catalog Collection: Public read access; write access for shop owners/admins
+    match /masterCatalog/{productId} {
+      allow read: if true;
+      allow write: if isShopOwner();
+    }
+
+    // Shops & Inventory Subcollections
+    match /shops/{shopId} {
+      allow read: if true;
+      allow write: if isOwner(shopId) || isAdmin();
+
+      match /inventory/{itemId} {
+        allow read: if true;
+        allow write: if isOwner(shopId) || isAdmin();
+      }
+    }
+
+    // Orders Collection
+    match /orders/{orderId} {
+      // Allow customers to read their own orders and shop owners/admins to read assigned orders
+      allow read: if isAuthenticated() && (
+        resource.data.customerId == request.auth.uid ||
+        resource.data.shopId == request.auth.uid ||
+        isAdmin()
+      );
+      
+      // Allow customers to create new orders
+      allow create: if isAuthenticated() && request.resource.data.customerId == request.auth.uid;
+      
+      // Allow order updates by assigned shop owner or customer owner
+      allow update: if isAuthenticated() && (
+        resource.data.shopId == request.auth.uid ||
+        resource.data.customerId == request.auth.uid ||
+        isAdmin()
+      );
+    }
+  }
+}

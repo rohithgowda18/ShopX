@@ -1,0 +1,11 @@
+{
+  "name": "Kirana AI",
+  "description": "An AI-powered grocery shopping app replacing paper lists using Gemini.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
