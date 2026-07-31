@@ -12,7 +12,6 @@ export default function InstallAppButton() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    // Check if app is already running in standalone mode (installed)
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true);
     }
@@ -54,7 +53,7 @@ export default function InstallAppButton() {
             <CheckCircle className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="font-bold text-sm text-gray-900 dark:text-white">Kirana AI App Installed</h4>
+            <h4 className="font-bold text-sm text-gray-900 dark:text-white">Kirana AI Installed</h4>
             <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Running in native app mode</p>
           </div>
         </div>
@@ -63,21 +62,25 @@ export default function InstallAppButton() {
   }
 
   if (!deferredPrompt) {
-    return null; // Hide button if installation isn't available or already installed
+    return null;
   }
 
   return (
-    <Card className="p-4 border-2 border-emerald-500/30 dark:border-emerald-500/50 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/40 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-      <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shadow-sm shrink-0">
-          <Smartphone className="w-6 h-6" />
+    <Card className="p-5 border-2 border-emerald-500/40 dark:border-emerald-500/60 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-100/50 dark:from-emerald-950/50 dark:via-teal-950/40 dark:to-emerald-900/30 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex items-start space-x-3.5">
+        <div className="w-12 h-12 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shadow-md shrink-0 text-xl">
+          📱
         </div>
         <div>
-          <h4 className="font-extrabold text-sm text-gray-900 dark:text-white">Install Kirana AI App</h4>
-          <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">Install on your phone for faster 1-tap grocery access.</p>
+          <h4 className="font-extrabold text-base text-gray-900 dark:text-white flex items-center gap-2">
+            Install Kirana AI
+          </h4>
+          <p className="text-xs text-gray-600 dark:text-gray-300 font-medium mt-1 leading-relaxed max-w-lg">
+            Install the app on your phone for faster access, offline support, and a full-screen experience.
+          </p>
         </div>
       </div>
-      <Button onClick={handleInstallClick} variant="primary" size="sm" className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-1.5 py-2.5">
+      <Button onClick={handleInstallClick} variant="primary" size="md" className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2 py-3 px-5 shadow-md">
         <Download className="w-4 h-4" /> Install App
       </Button>
     </Card>
