@@ -4,27 +4,26 @@ import { db } from '../../firebase/config';
 import { useAuth } from '../../context/AuthContext';
 import { Order, OrderStatus } from '../../types';
 import { PRODUCTS } from '../../data/products';
-import { Package, Clock, CheckCircle } from 'lucide-react';
+import { Package, Clock, CheckCircle, Store, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { Card, Badge, Button, Skeleton } from '../../components/ui/DesignSystem';
 
 export default function ShopOrders() {
   const { userProfile } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // For this simplified version, we assume the shop owner has only 1 shop, and the shop ID is their user ID.
-  // In a real app, we'd query the shop document to get the shop ID.
   const shopId = userProfile?.id;
 
   useEffect(() => {
     if (!shopId) return;
     setLoading(true);
-    
+
     const q = query(
       collection(db, 'orders'),
       where('shopId', '==', shopId)
     );
-    
+
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const orderList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
       orderList.sort((a, b) => b.createdAt - a.createdAt);
@@ -48,87 +47,114 @@ export default function ShopOrders() {
     }
   };
 
-  if (loading) return <div className="p-4 text-center dark:text-gray-400">Loading orders...</div>;
+  const getBadgeVariant = (status: OrderStatus): 'default' | 'success' | 'warning' | 'danger' | 'info' => {
+    switch (status) {
+      case 'pending': return 'warning';
+      case 'accepted':
+      case 'packing': return 'info';
+      case 'ready':
+      case 'delivered': return 'success';
+      case 'cancelled': return 'danger';
+      default: return 'default';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-4 md:p-6 space-y-4 max-w-5xl mx-auto">
+        <Skeleton className="h-8 w-48 mb-6" />
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-40 w-full" />
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4 space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Manage Orders</h2>
+    <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto pb-24">
+      <div>
+        <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
+          <Store className="w-7 h-7 text-emerald-600" /> Manage Shop Orders
+        </h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-1">
+          Accept incoming customer requests and update fulfillment states
+        </p>
+      </div>
 
       {orders.length === 0 ? (
-        <div className="text-center py-10 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 transition-colors">
-          <Package className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-500 dark:text-gray-400">No orders yet.</p>
-        </div>
+        <Card className="text-center py-12 px-4 border-dashed">
+          <Package className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-1">No orders yet</h3>
+          <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs mx-auto">
+            Customer orders assigned to your shop will appear here in real-time.
+          </p>
+        </Card>
       ) : (
         <div className="space-y-4">
           {orders.map(order => (
-            <div key={order.id} className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
-              <div className="flex justify-between items-start mb-3 border-b dark:border-gray-700 pb-3">
+            <Card key={order.id} className="p-4 md:p-5">
+              <div className="flex justify-between items-start mb-3 border-b border-gray-100 dark:border-gray-700/60 pb-3">
                 <div>
-                  <p className="font-bold text-gray-800 dark:text-white text-sm">Order #{order.id.slice(-6).toUpperCase()}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{order.customerName || 'Customer'} • {new Date(order.createdAt).toLocaleTimeString()}</p>
+                  <p className="font-bold text-gray-900 dark:text-white text-sm">
+                    Order #{order.id.slice(-6).toUpperCase()}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                    {order.customerName || 'Customer'} • {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
                 </div>
-                <span className="bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs font-bold uppercase">{order.status}</span>
-              </div>
-              
-              <div className="space-y-2 mb-4 bg-gray-50 dark:bg-gray-900 p-3 rounded-xl transition-colors">
-                {order.items.map((item, idx) => (
-                  <div key={idx} className="flex justify-between text-sm">
-                    <span>
-                      <span className="font-medium text-gray-800 dark:text-white capitalize">{item.name}</span>
-                      {(() => {
-                        const product = PRODUCTS.find(p => p.englishName.toLowerCase() === item.name.toLowerCase());
-                        return product ? <span className="ml-2 text-gray-600 dark:text-gray-300 font-bold">{product.kannadaName}</span> : null;
-                      })()}
-                    </span>
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">{item.quantity} {item.unit}</span>
-                  </div>
-                ))}
+                <Badge variant={getBadgeVariant(order.status)}>
+                  {order.status.toUpperCase()}
+                </Badge>
               </div>
 
-              <div className="flex space-x-2">
+              <div className="space-y-2 mb-4 bg-gray-50 dark:bg-gray-700/30 p-3.5 rounded-xl border border-gray-100 dark:border-gray-700/50">
+                {order.items.map((item, idx) => {
+                  const product = PRODUCTS.find(p => p.englishName.toLowerCase() === item.name.toLowerCase());
+                  return (
+                    <div key={idx} className="flex justify-between text-sm items-center">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-bold text-gray-900 dark:text-white capitalize">{item.name}</span>
+                        {product && (
+                          <span className="text-xs font-bold text-gray-500 dark:text-gray-400 bg-gray-200/60 dark:bg-gray-700 px-1.5 py-0.5 rounded">
+                            {product.kannadaName}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs font-bold text-gray-600 dark:text-gray-300">
+                        {item.quantity} {item.unit}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex flex-wrap gap-2">
                 {order.status === 'pending' && (
-                  <button 
-                    onClick={() => handleUpdateStatus(order.id, 'accepted')}
-                    className="flex-1 bg-blue-600 text-white font-medium py-2 rounded-xl text-sm hover:bg-blue-700"
-                  >
+                  <Button onClick={() => handleUpdateStatus(order.id, 'accepted')} variant="primary" className="flex-1">
                     Accept Order
-                  </button>
+                  </Button>
                 )}
                 {order.status === 'accepted' && (
-                  <button 
-                    onClick={() => handleUpdateStatus(order.id, 'packing')}
-                    className="flex-1 bg-orange-600 text-white font-medium py-2 rounded-xl text-sm hover:bg-orange-700"
-                  >
+                  <Button onClick={() => handleUpdateStatus(order.id, 'packing')} variant="primary" className="flex-1">
                     Start Packing
-                  </button>
+                  </Button>
                 )}
                 {order.status === 'packing' && (
-                  <button 
-                    onClick={() => handleUpdateStatus(order.id, 'ready')}
-                    className="flex-1 bg-green-600 text-white font-medium py-2 rounded-xl text-sm hover:bg-green-700"
-                  >
+                  <Button onClick={() => handleUpdateStatus(order.id, 'ready')} variant="primary" className="flex-1">
                     Mark Ready
-                  </button>
+                  </Button>
                 )}
                 {order.status === 'ready' && (
-                  <button 
-                    onClick={() => handleUpdateStatus(order.id, 'delivered')}
-                    className="flex-1 bg-green-800 text-white font-medium py-2 rounded-xl text-sm hover:bg-green-900"
-                  >
-                    Delivered
-                  </button>
+                  <Button onClick={() => handleUpdateStatus(order.id, 'delivered')} variant="primary" className="flex-1">
+                    Mark Delivered
+                  </Button>
                 )}
                 {['pending', 'accepted'].includes(order.status) && (
-                  <button 
-                    onClick={() => handleUpdateStatus(order.id, 'cancelled')}
-                    className="flex-none bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 font-medium px-4 py-2 rounded-xl text-sm hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
-                  >
-                    Reject
-                  </button>
+                  <Button onClick={() => handleUpdateStatus(order.id, 'cancelled')} variant="danger">
+                    Reject Order
+                  </Button>
                 )}
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}

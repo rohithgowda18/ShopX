@@ -1,83 +1,152 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Package, CheckCircle, Clock, TrendingUp } from 'lucide-react';
+import { Package, CheckCircle, Clock, TrendingUp, Store, Plus, ChevronRight, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '../../firebase/config';
+import { Order } from '../../types';
+import { Card, Badge, Button, Skeleton } from '../../components/ui/DesignSystem';
 
 export default function ShopOwnerDashboard() {
   const { userProfile } = useAuth();
   const navigate = useNavigate();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const shopId = userProfile?.id;
+
+  useEffect(() => {
+    if (!shopId) return;
+    setLoading(true);
+
+    const q = query(
+      collection(db, 'orders'),
+      where('shopId', '==', shopId)
+    );
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const orderList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+      orderList.sort((a, b) => b.createdAt - a.createdAt);
+      setOrders(orderList);
+      setLoading(false);
+    }, (error) => {
+      console.error('Error fetching dashboard orders:', error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [shopId]);
+
+  const pendingCount = orders.filter(o => o.status === 'pending').length;
+  const packingCount = orders.filter(o => o.status === 'accepted' || o.status === 'packing').length;
+  const readyCount = orders.filter(o => o.status === 'ready' || o.status === 'delivered').length;
+
+  if (loading) {
+    return (
+      <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+        </div>
+        <Skeleton className="h-48 w-full" />
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4 space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800">Shop Dashboard</h2>
-        <p className="text-gray-500">Welcome back, {userProfile?.name || 'Owner'}</p>
+    <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto pb-24">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
+            <Store className="w-7 h-7 text-emerald-600" /> Shop Dashboard
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-1">
+            Welcome back, {userProfile?.name || 'Shop Owner'}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={() => navigate('/shop/import-products')} variant="primary" className="flex items-center gap-2">
+            <Plus className="w-4 h-4" /> Add Product
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-center">
-          <div className="flex items-center space-x-2 text-blue-600 mb-2">
+      {/* Metrics Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
+        <Card className="p-4 flex flex-col justify-between">
+          <div className="flex items-center space-x-2 text-amber-600 dark:text-amber-400 mb-1">
             <Clock className="w-5 h-5" />
-            <span className="font-medium">Pending</span>
+            <span className="font-bold text-xs uppercase tracking-wider">Pending</span>
           </div>
-          <span className="text-3xl font-bold text-gray-800">5</span>
-        </div>
+          <span className="text-3xl font-extrabold text-gray-900 dark:text-white">{pendingCount}</span>
+        </Card>
 
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-center">
-          <div className="flex items-center space-x-2 text-orange-500 mb-2">
+        <Card className="p-4 flex flex-col justify-between">
+          <div className="flex items-center space-x-2 text-sky-600 dark:text-sky-400 mb-1">
             <Package className="w-5 h-5" />
-            <span className="font-medium">Packing</span>
+            <span className="font-bold text-xs uppercase tracking-wider">Packing</span>
           </div>
-          <span className="text-3xl font-bold text-gray-800">2</span>
-        </div>
+          <span className="text-3xl font-extrabold text-gray-900 dark:text-white">{packingCount}</span>
+        </Card>
 
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-center">
-          <div className="flex items-center space-x-2 text-green-600 mb-2">
+        <Card className="p-4 flex flex-col justify-between">
+          <div className="flex items-center space-x-2 text-emerald-600 dark:text-emerald-400 mb-1">
             <CheckCircle className="w-5 h-5" />
-            <span className="font-medium">Completed</span>
+            <span className="font-bold text-xs uppercase tracking-wider">Ready</span>
           </div>
-          <span className="text-3xl font-bold text-gray-800">12</span>
-        </div>
+          <span className="text-3xl font-extrabold text-gray-900 dark:text-white">{readyCount}</span>
+        </Card>
 
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-center">
-          <div className="flex items-center space-x-2 text-purple-600 mb-2">
+        <Card className="p-4 flex flex-col justify-between">
+          <div className="flex items-center space-x-2 text-purple-600 dark:text-purple-400 mb-1">
             <TrendingUp className="w-5 h-5" />
-            <span className="font-medium">Revenue</span>
+            <span className="font-bold text-xs uppercase tracking-wider">Total Orders</span>
           </div>
-          <span className="text-xl font-bold text-gray-800">₹4,250</span>
-        </div>
+          <span className="text-3xl font-extrabold text-gray-900 dark:text-white">{orders.length}</span>
+        </Card>
       </div>
 
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-gray-800 text-lg">Today's Orders</h3>
-          <button onClick={() => navigate('/shop/orders')} className="text-green-600 text-sm font-medium">View All</button>
+      {/* Action / Today's Orders Section */}
+      <Card className="p-4 md:p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-extrabold text-lg text-gray-900 dark:text-white">Recent Shop Orders</h3>
+          <Button onClick={() => navigate('/shop/orders')} variant="ghost" size="sm" className="text-emerald-600 dark:text-emerald-400">
+            Manage All <ChevronRight className="w-4 h-4 ml-1" />
+          </Button>
         </div>
-        
-        {/* Placeholder for orders */}
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-3">
-          <div className="flex justify-between items-start mb-3">
-            <div>
-              <p className="font-bold text-gray-800">#ORD-9281</p>
-              <p className="text-sm text-gray-500">Ramesh K • 15 items</p>
-            </div>
-            <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-md">NEW</span>
+
+        {orders.length === 0 ? (
+          <div className="text-center py-8 text-gray-400 text-sm">
+            No active orders. New customer orders will show here live.
           </div>
-          <button className="w-full bg-green-50 text-green-700 font-medium py-2 rounded-xl text-sm border border-green-200">
-            Accept & Start Packing
-          </button>
-        </div>
-      </div>
-      
-      <div className="mt-4">
-        <button 
-          onClick={() => navigate('/shop/products')}
-          className="w-full bg-blue-50 border border-blue-200 text-blue-700 font-bold py-4 rounded-2xl hover:bg-blue-100 transition-colors flex justify-center items-center space-x-2"
-        >
-          <Package className="w-5 h-5" />
-          <span>Manage Inventory (Add Products)</span>
-        </button>
-      </div>
+        ) : (
+          <div className="space-y-3">
+            {orders.slice(0, 3).map(order => (
+              <div key={order.id} className="p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="font-bold text-sm text-gray-900 dark:text-white">Order #{order.id.slice(-6).toUpperCase()}</span>
+                    <Badge variant={order.status === 'pending' ? 'warning' : 'info'}>{order.status.toUpperCase()}</Badge>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {order.customerName || 'Customer'} • {order.items.length} items
+                  </p>
+                </div>
+                <Button onClick={() => navigate('/shop/orders')} variant="outline" size="sm">
+                  View
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
+      <Button onClick={() => navigate('/shop/products')} variant="secondary" className="w-full justify-center py-4">
+        <Package className="w-5 h-5 mr-2" /> Manage Shop Inventory & Stock
+      </Button>
     </div>
   );
 }

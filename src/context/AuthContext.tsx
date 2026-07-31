@@ -26,11 +26,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (isDevRef.current) return;
       setCurrentUser(user);
       if (user) {
-        const docRef = doc(db, 'users', user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setUserProfile(docSnap.data() as UserProfile);
-        } else {
+        try {
+          const docRef = doc(db, 'users', user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setUserProfile(docSnap.data() as UserProfile);
+          } else {
+            setUserProfile(null);
+          }
+        } catch (err) {
+          console.warn('Could not fetch user profile (document may not exist yet):', err);
           setUserProfile(null);
         }
       } else {
