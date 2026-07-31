@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { User, Phone, Globe, LogOut, Moon, Sun, Monitor, ShieldCheck } from 'lucide-react';
 import { Card, Badge, Button } from '../../components/ui/DesignSystem';
+import InstallAppButton from '../../components/ui/InstallAppButton';
 
 export default function Profile() {
   const { userProfile, signOut } = useAuth();
@@ -107,6 +108,11 @@ export default function Profile() {
               Hindi
             </button>
           </div>
+        </div>
+
+        {/* Secondary App Install Banner */}
+        <div className="p-4 md:p-5">
+          <InstallAppButton />
         </div>
 
         {/* Sign Out Button */}

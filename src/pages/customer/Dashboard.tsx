@@ -11,6 +11,7 @@ import QuantityBottomSheet from '../../components/customer/QuantityBottomSheet';
 import SearchBar from '../../components/customer/SearchBar';
 import { Product } from '../../data/types';
 import { Card, Badge, Button, Skeleton } from '../../components/ui/DesignSystem';
+import InstallAppButton from '../../components/ui/InstallAppButton';
 
 export default function CustomerDashboard() {
   const { userProfile } = useAuth();
@@ -92,6 +93,9 @@ export default function CustomerDashboard() {
           onCameraClick={() => navigate('/customer/create-list?mode=scan')}
         />
       </div>
+
+      {/* Primary App Installation Banner */}
+      <InstallAppButton />
 
       {/* 3. Primary User Action Cards with Friendly Indian Household Context */}
       <div>
