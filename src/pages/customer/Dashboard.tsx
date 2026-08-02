@@ -5,11 +5,10 @@ import { useNavigate } from 'react-router';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { Order } from '../../types';
-import { CATEGORIES, PRODUCTS } from '../../data/products';
+import { CATEGORIES, PRODUCTS, Product } from '../../data/products';
 import ProductCard from '../../components/customer/ProductCard';
 import QuantityBottomSheet from '../../components/customer/QuantityBottomSheet';
 import SearchBar from '../../components/customer/SearchBar';
-import { Product } from '../../data/types';
 import { Card, Badge, Button, Skeleton } from '../../components/ui/DesignSystem';
 import InstallAppButton from '../../components/ui/InstallAppButton';
 

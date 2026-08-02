@@ -7,7 +7,6 @@ import SearchBar from '../../components/customer/SearchBar';
 import ProductCard from '../../components/customer/ProductCard';
 import QuantityBottomSheet from '../../components/customer/QuantityBottomSheet';
 import FloatingCart from '../../components/customer/FloatingCart';
-import { parseVoiceInput } from '../../utils/voiceParser';
 import { useAuth } from '../../context/AuthContext';
 import { catalogService } from '../../catalog/services/catalogService';
 import { inventoryService } from '../../services/inventoryService';

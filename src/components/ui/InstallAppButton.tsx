@@ -3,10 +3,10 @@ import { Download } from 'lucide-react';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 export default function InstallAppButton() {
-  const { isInstalled, triggerInstall } = usePWAInstall();
+  const { canInstall, isInstalled, triggerInstall } = usePWAInstall();
   const [loading, setLoading] = useState(false);
 
-  if (isInstalled) {
+  if (!canInstall || isInstalled) {
     return null;
   }
 

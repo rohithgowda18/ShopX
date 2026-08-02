@@ -8,52 +8,15 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+import { usePWAInstall } from '../../hooks/usePWAInstall';
+
 export default function AppLayout() {
   const { userProfile, signOut } = useAuth();
   const navigate = useNavigate();
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
-
-  useEffect(() => {
-    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true) {
-      setIsInstalled(true);
-    }
-
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-    };
-
-    const handleAppInstalled = () => {
-      setIsInstalled(true);
-      setDeferredPrompt(null);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
-    };
-  }, []);
+  const { canInstall, isInstalled, triggerInstall } = usePWAInstall();
 
   const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setIsInstalled(true);
-      }
-      setDeferredPrompt(null);
-    } else {
-      const userAgent = window.navigator.userAgent.toLowerCase();
-      if (/iphone|ipad|ipod/.test(userAgent)) {
-        alert('To install on iPhone/iPad: Tap Share button in Safari and select "Add to Home Screen" 📲');
-      } else {
-        alert('To install app: Open browser menu (⋮ or ⊕) and tap "Install app" or "Add to Home screen".');
-      }
-    }
+    await triggerInstall();
   };
 
   const handleSignOut = async () => {
@@ -101,7 +64,7 @@ export default function AppLayout() {
         </nav>
 
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-          {!isInstalled && (
+          {canInstall && !isInstalled && (
             <button
               onClick={handleInstallClick}
               className="flex items-center space-x-3 w-full px-4 py-3 rounded-xl text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 font-semibold transition-all min-h-touch"
@@ -130,7 +93,7 @@ export default function AppLayout() {
           <h1 className="text-xl font-bold text-gray-800 dark:text-white tracking-tight">Namma Angadi</h1>
         </div>
         <div className="flex items-center space-x-2">
-          {!isInstalled && (
+          {canInstall && !isInstalled && (
             <button
               onClick={handleInstallClick}
               className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold min-h-touch"
